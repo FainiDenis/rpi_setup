@@ -158,6 +158,31 @@ hardening_sshd() {
   log "SSH hardened and restarted"
 }
 
+setup_samba_shares() {
+  step "Backing up original Samba configuration"
+  progress; cp /etc/samba/smb.conf /etc/samba/smb.conf.bak > /dev/null 2>&1
+  log "Samba configuration backed up to /etc/samba/smb.conf.bak"
+
+  step "Copy new Samba configuration"
+  progress; cp ./smb.conf /etc/samba/smb.conf > /dev/null 2>&1
+  log "New Samba configuration copied"
+
+  step "Create a directory for external drive"
+  progress; mkdir -p /mnt/4TB_HDD > /dev/null 2>&1
+  log "External drive directory created"
+
+  step "Set ownership for /mnt/4TB_HDD"
+  progress; chown -R "${SUDO_USER:-$USER}":"${SUDO_USER:-$USER}" /mnt/4TB_HDD > /dev/null 2>&1
+  log "Ownership for /mnt/4TB_HDD set to ${SUDO_USER:-$USER}"
+
+  step "Setting Samba password for user ${SUDO_USER:-$USER}"
+  smbpasswd -a "${SUDO_USER:-$USER}"
+  log "Samba password set for user ${SUDO_USER:-$USER}"
+
+  progress; systemctl restart smbd > /dev/null 2>&1
+  log "Samba services restarted"
+}
+
 enable_services() {
   step "Enabling services"
   progress; systemctl enable ssh > /dev/null 2>&1
@@ -204,6 +229,7 @@ main() {
   install_cockpit_plugins
   install_cockpit_file_sharing
   hardening_sshd
+  setup_samba_shares
   install_tailscale
   configure_firewall
   enable_services
