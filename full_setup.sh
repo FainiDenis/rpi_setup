@@ -141,6 +141,23 @@ configure_firewall() {
   log "Firewall configured successfully"
 }
 
+hardening_sshd() {
+  step "Backup SSH configuration"
+  progress; cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak > /dev/null 2>&1
+  log "SSH configuration backed up to /etc/ssh/sshd_config.bak"
+
+  step "Remove SSH config file"
+  progress; rm /etc/ssh/sshd_config > /dev/null 2>&1
+  log "SSH config file removed"
+
+  step "Copy new SSH config file"
+  progress; cp ./sshd_config /etc/ssh/sshd_config > /dev/null 2>&1
+  log "New SSH config file copied"
+
+  progress; systemctl restart ssh > /dev/null 2>&1
+  log "SSH hardened and restarted"
+}
+
 enable_services() {
   step "Enabling services"
   progress; systemctl enable ssh > /dev/null 2>&1
@@ -186,6 +203,7 @@ main() {
   install_portainer
   install_cockpit_plugins
   install_cockpit_file_sharing
+  hardening_sshd
   install_tailscale
   configure_firewall
   enable_services
