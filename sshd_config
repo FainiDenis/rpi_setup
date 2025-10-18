@@ -1,0 +1,81 @@
+Include /etc/ssh/sshd_config.d/*.conf
+
+# Basic Settings
+Port 22
+Protocol 2
+AddressFamily inet
+ListenAddress 0.0.0.0
+
+# Disable root login
+PermitRootLogin no
+
+# Allow only specific users or groups (choose one)
+# CHANGE THIS TO YOUR USERNAME!
+AllowUsers fainidenis
+# Or: AllowGroups sshusers
+
+# Strong Authentication
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+UsePAM yes
+
+# Public Key Authentication only
+PubkeyAuthentication yes
+AuthenticationMethods publickey
+
+# Disable unused authentication methods
+KerberosAuthentication no
+GSSAPIAuthentication no
+HostbasedAuthentication no
+
+# Restrict and harden host key algorithms
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
+
+# Limit and control access
+MaxAuthTries 3
+MaxSessions 2
+LoginGraceTime 30s
+PermitEmptyPasswords no
+IgnoreRhosts yes
+IgnoreUserKnownHosts yes
+
+# Disable X11 forwarding unless needed
+X11Forwarding no
+X11UseLocalhost yes
+
+# Disable TCP forwarding unless explicitly needed
+AllowTcpForwarding no
+PermitTunnel no
+
+# Logging
+LogLevel VERBOSE
+SyslogFacility AUTH
+
+# ChrootDirectory and ForceCommand for restricted users (optional)
+# Match User sftpuser
+#     ChrootDirectory /home/sftpuser
+#     ForceCommand internal-sftp
+#     AllowTcpForwarding no
+#     X11Forwarding no
+
+# Disable unnecessary features
+PrintMotd no
+PrintLastLog yes
+Banner /etc/issue.net
+
+# Session settings
+UseDNS no
+ClientAliveInterval 300
+ClientAliveCountMax 2
+TCPKeepAlive no
+
+# Allow client to pass locale and color environment variables
+AcceptEnv LANG LC_* COLORTERM NO_COLOR
+
+# Modern FIPS/Compliance Settings (optional)
+# FIPS mode requires system support and OpenSSH compiled with FIPS.
+# Use only FIPS-approved algorithms if required.
+
+# Restrict SFTP only (if needed)
+Subsystem       sftp    /usr/lib/openssh/sftp-server
