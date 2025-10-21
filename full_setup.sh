@@ -151,7 +151,7 @@ hardening_sshd() {
   log "SSH config file removed"
 
   step "Copy new SSH config file"
-  progress; cp ./sshd_config /etc/ssh/sshd_config > /dev/null 2>&1
+  progress; cp sshd_config /etc/ssh/sshd_config > /dev/null 2>&1
   log "New SSH config file copied"
 
   progress; systemctl restart ssh > /dev/null 2>&1
@@ -164,7 +164,7 @@ setup_samba_shares() {
   log "Samba configuration backed up to /etc/samba/smb.conf.bak"
 
   step "Copy new Samba configuration"
-  progress; cp ./smb.conf /etc/samba/smb.conf > /dev/null 2>&1
+  progress; cp smb.conf /etc/samba/smb.conf > /dev/null 2>&1
   log "New Samba configuration copied"
 
   step "Create a directory for external drive"
