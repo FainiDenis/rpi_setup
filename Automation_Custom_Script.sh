@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 
 # ========= Defaults (override via env) =========
@@ -99,12 +99,31 @@ setup_samba() {
   ok "Samba running"
 }
 
+set_firewall() {
+  if command -v ufw >/dev/null 2>&1; then
+    log "Configuring UFW firewall"
+    apt_quiet install ufw
+    ufw ufw default deny incoming >/dev/null 2>&1 || die "Failed to set UFW default policy"
+    ufw default allow outgoing >/dev/null 2>&1 || die "Failed to set UFW default policy"
+    ufw allow 80/tcp >/dev/null 2>&1 || die "Failed to allow HTTP in UFW"
+    ufw allow 443/tcp >/dev/null 2>&1 || die "Failed to allow HTTPS in UFW"
+    ufw allow in on tailscale0 to any >/dev/null 2>&1 || die "Failed to allow Tailscale interface in UFW"
+    ufw allow from 192.168.1.0/24 to any  >/dev/null 2>&1 || die "Failed to allow local network in UFW"
+    ufw --force enable >/dev/null 2>&1 || die "Failed to enable UFW"
+    ufw reload >/dev/null 2>&1 || die "Failed to reload UFW"
+    ok "Firewall configured"
+  else
+    warn "UFW not found, skipping firewall configuration"
+  fi
+}
+
 main() {
   require_root
   echo -e "\n\033[1;36m🚀 Running Automation Custom Script from Git Repo\033[0m"
   set_hostname
   rename_user
   setup_samba
+  set_firewall
   ok "Setup complete"
   echo "Reboot recommended if you renamed the current user."
 }
