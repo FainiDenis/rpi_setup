@@ -43,6 +43,22 @@ rename_user() {
   ok "Renamed user to ${NEW_USERNAME}"
 }
 
+add_user_to_app_groups() {
+  log "Adding ${NEW_USERNAME} to known app groups"
+
+  APP_GROUPS="navidrome docker sambashare beets gitea"
+
+  for group in ${APP_GROUPS}; do
+    if getent group "${group}" >/dev/null 2>&1; then
+      usermod -aG "${group}" "${NEW_USERNAME}" >/dev/null 2>&1 || true
+      echo "  → Added to group: ${group}"
+    fi
+  done
+
+  ok "App group assignment complete"
+}
+
+
 download_smb_conf() {
   local tmp
   tmp="$(mktemp /tmp/smb.conf.XXXXXX)"
@@ -123,6 +139,7 @@ main() {
   set_hostname
   rename_user
   setup_samba
+  add_user_to_app_groups
   set_firewall
   ok "Setup complete"
   echo "Reboot recommended if you renamed the current user."
