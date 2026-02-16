@@ -133,6 +133,36 @@ set_firewall() {
   fi
 }
 
+install_cloudflared() {
+  log "Installing Cloudflare Tunnel (cloudflared)"
+
+  apt_quiet update
+  apt_quiet install curl ca-certificates gnupg
+
+  # Create keyrings directory
+  mkdir -p --mode=0755 /usr/share/keyrings
+
+  # Add Cloudflare GPG key (only if not already present)
+  if [[ ! -f /usr/share/keyrings/cloudflare-public-v2.gpg ]]; then
+    curl -fsSL https://pkg.cloudflare.com/cloudflare-public-v2.gpg \
+      | gpg --dearmor -o /usr/share/keyrings/cloudflare-public-v2.gpg \
+      || die "Failed to add Cloudflare GPG key"
+  fi
+
+  # Add repository (only if not already added)
+  if [[ ! -f /etc/apt/sources.list.d/cloudflared.list ]]; then
+    echo "deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main" \
+      > /etc/apt/sources.list.d/cloudflared.list
+  fi
+
+  # Install cloudflared
+  apt_quiet update
+  apt_quiet install cloudflared
+
+  ok "Cloudflared installed successfully"
+}
+
+
 main() {
   require_root
   echo -e "\n\033[1;36m🚀 Running Automation Custom Script from Git Repo\033[0m"
@@ -141,6 +171,7 @@ main() {
   setup_samba
   add_user_to_app_groups
   set_firewall
+  install_cloudflared
   ok "Setup complete"
   echo "Reboot recommended if you renamed the current user."
 }
