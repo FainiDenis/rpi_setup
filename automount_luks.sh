@@ -52,6 +52,6 @@ echo "Done."
 echo "crypttab: ${CRYPTTAB_LINE}"
 echo "fstab:    ${FSTAB_LINE}"
 echo
-systemctl daemon-reload"
-sudo mount -a"
-ls ${MOUNTPOINT}"
+systemctl daemon-reload
+sudo mount -a
+ls ${MOUNTPOINT}
